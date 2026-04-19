@@ -4,8 +4,18 @@ OpenClaw es un proyecto de código abierto que proporciona una plataforma para l
 ---
 <br>
 
+## 1. Instalación 🚀
+```bash
+# Actualizamos la lista de paquetes
+apt update && apt upgrade -y
 
-## 1. Comandos básicos 💻
+# Ejecutamos el comando de instalación de OpenClaw
+curl -fsSL https://openclaw.ai/install.sh | bash
+```
+---
+<br>
+
+## 2. Comandos básicos 💻
 ```bash
 acp *          # Agent Control Protocol tools
 agent          # Run one agent turn via the Gateway
@@ -63,9 +73,7 @@ webhooks *     # Webhook helpers and integrations
 ---
 <br>
 
-
-
-## 2. Archivo de configuración 🛠️
+## 3. Archivo de configuración 🛠️
 El archivo `openclaw.json` tiene las siguientes secciones principales:
 - `agents`: Configuración relacionada con los agentes, incluyendo el espacio de trabajo y los modelos utilizados.
 - `gateway`: Configuración del gateway, incluyendo el modo de operación, autenticación, puerto, y opciones de Tailscale.
@@ -149,3 +157,7 @@ $ cat openclaw.json
   }
 }
 ```
+---
+<br><br><br>
+
+## *[volver al índice](../README.md)*
