@@ -124,6 +124,25 @@ tui            # Open a terminal UI connected to the Gateway
 uninstall      # Uninstall the gateway service + local data (CLI remains)
 update *       # Update OpenClaw and inspect update channel status
 webhooks *     # Webhook helpers and integrations
+
+
+# GATEWAY COMMANDS
+openclaw gateway
+
+install        # Install the gateway as a managed service (systemd --user)
+start          # Start the gateway service
+stop           # Stop the gateway service
+restart        # Restart the gateway service
+status         # Show gateway status (running, port, health)
+
+run            # Run gateway in foreground (manual mode)
+               # Start gateway directly (shortcut to run)
+--force        # Force start even if checks fail
+--port <port>  # Run gateway on custom port
+--dev          # Run in development mode
+--allow-unconfigured  # Start without full config (debug/setup)
+
+uninstall      # Remove gateway service (keeps CLI)
 ```
 ---
 <br>
@@ -228,6 +247,15 @@ $ cat openclaw.json
 }
 ```
 ---
+<br>
+
+
+## 4. Conexión SSH (tunneling) 🔐
+```bash
+ssh -L 18789:localhost:18789 root@openclaw
+```
+---
+
 <br><br><br>
 
 ## *[volver al índice](../README.md)*
