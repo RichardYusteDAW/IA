@@ -5,6 +5,7 @@ OpenClaw es un proyecto de código abierto que proporciona una plataforma para l
 <br>
 
 ## 1. Instalación 🚀
+### 1.1. Comandos de instalación
 ```bash
 # Actualizamos la lista de paquetes
 apt update && apt upgrade -y
@@ -12,6 +13,60 @@ apt update && apt upgrade -y
 # Ejecutamos el comando de instalación de OpenClaw
 curl -fsSL https://openclaw.ai/install.sh | bash
 ```
+<br>
+
+### 1.2. Pantallas de instalación
+- Entiendo que esto es personal por defecto y que el uso compartido/multiusuario requiere medidas de seguridad. ¿Continuar?  
+![Pantalla 1](../_img/openclaw_sreenshots/1.png)
+
+- ¿Inicio rápido o manual?  
+![Pantalla 2](../_img/openclaw_sreenshots/2.png)
+
+- ¿Gateway local o en la nube?  
+![Pantalla 3](../_img/openclaw_sreenshots/3.png)
+
+- Directorio de trabajo del agente (workspace)  
+![Pantalla 4](../_img/openclaw_sreenshots/4.png)
+
+- Configurar el OAuth para el modelo de lenguaje (en este caso, OpenAI Codex)  
+![Pantalla 5](../_img/openclaw_sreenshots/5.png)
+
+- Abrir esa URL y copiar la URL que genera el proceso de autenticación (en este caso, para OpenAI Codex)  
+![Pantalla 6](../_img/openclaw_sreenshots/6.png)
+
+- Modelo que se va a usar por defecto para los agentes (en este caso, OpenAI Codex GPT-5.4)  
+![Pantalla 7](../_img/openclaw_sreenshots/7.png)
+
+- Puerto para el Gateway (18791 por defecto)  
+![Pantalla 8](../_img/openclaw_sreenshots/8.png)
+
+- IP de enlace para el Gateway (loopback por defecto, lo que significa que solo será accesible desde la máquina local)  
+![Pantalla 9](../_img/openclaw_sreenshots/9.png)
+
+- Autenticación para el Gateway (token por defecto, lo que significa que se generará un token de autenticación que se usará para acceder al Gateway)  
+![Pantalla 10](../_img/openclaw_sreenshots/10.png)
+
+- Tailscale para el acceso remoto al Gateway (desactivado por defecto, lo que significa que el Gateway no estará accesible a través de Tailscale)  
+![Pantalla 11](../_img/openclaw_sreenshots/11.png)
+
+- ¿Quieres proveer el token de autenticación ahora o dejar que se genere automáticamente? (generar automáticamente por defecto)  
+![Pantalla 12](../_img/openclaw_sreenshots/12.png)
+
+- Token en blanco para que se genere automáticamente  
+![Pantalla 13](../_img/openclaw_sreenshots/13.png)
+
+- ¿Configurar canales de chat? (no por defecto, lo que significa que los canales de comunicación se pueden configurar más tarde. Decimos que sí para configurar Telegram)  
+![Pantalla 14](../_img/openclaw_sreenshots/14.png)
+
+- Selecciona un canal de chat para configurar (en este caso, Telegram)  
+![Pantalla 15](../_img/openclaw_sreenshots/15.png)
+
+- Introducir el token del bot de Telegram  
+![Pantalla 16](../_img/openclaw_sreenshots/16.png)
+
+- Configurar gestion de dispositivos (Device Managment). Por defecto se empareja
+![Pantalla 17](../_img/openclaw_sreenshots/17.png)
+
 ---
 <br>
 
@@ -93,13 +148,9 @@ $ cat openclaw.json
 {
   "agents": {
     "defaults": {
-      "workspace": "C:\\Users\\User\\.openclaw\\workspace",
+      "workspace": "/root/.openclaw/workspace",
       "models": {
-        "openai-codex/gpt-5.4": {
-          "params": {
-            "transport": "sse"
-          }
-        }
+        "openai-codex/gpt-5.4": {}
       },
       "model": {
         "primary": "openai-codex/gpt-5.4"
@@ -110,49 +161,68 @@ $ cat openclaw.json
     "mode": "local",
     "auth": {
       "mode": "token",
-      "token": {{ token }}
+      "token": "${GATEWAY_TOKEN}"
     },
-    "port": 18791,
+    "port": 18789,
     "bind": "loopback",
     "tailscale": {
       "mode": "off",
       "resetOnExit": false
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "contacts.add",
+        "calendar.add",
+        "reminders.add",
+        "sms.send",
+        "sms.search"
+      ]
     }
   },
-  "meta": {
-    "lastTouchedVersion": "2026.4.14",
-    "lastTouchedAt": "2026-04-19T13:45:41.831Z"
+  "session": {
+    "dmScope": "per-channel-peer"
   },
-  "wizard": {
-    "lastRunAt": "2026-04-16T11:25:47.769Z",
-    "lastRunVersion": "2026.4.14",
-    "lastRunCommand": "configure",
-    "lastRunMode": "local"
+  "tools": {
+    "profile": "coding"
   },
   "auth": {
     "profiles": {
-      "openai-codex:richybtc@hotmail.com": {
+      "openai-codex:richy_ai@hotmail.com": {
         "provider": "openai-codex",
         "mode": "oauth",
-        "email": "richybtc@hotmail.com"
-      }
-    }
-  },
-  "plugins": {
-    "entries": {
-      "openai": {
-        "enabled": true
-      },
-      "telegram": {
-        "enabled": true
+        "email": "richy_ai@hotmail.com"
       }
     }
   },
   "channels": {
     "telegram": {
-      "botToken": {{ telegramBotToken }},
-      "dmPolicy": "pairing",
-      "groupPolicy": "allowlist"
+      "enabled": true,
+      "groups": {
+        "*": {
+          "requireMention": true
+        }
+      },
+      "botToken": "${TELEGRAM_BOT_TOKEN}"
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-04-19T19:36:00.755Z",
+    "lastRunVersion": "2026.4.15",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.4.15",
+    "lastTouchedAt": "2026-04-19T19:36:13.995Z"
+  },
+  "plugins": {
+    "entries": {
+      "openai": {
+        "enabled": true
+      }
     }
   }
 }
