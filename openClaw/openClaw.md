@@ -281,7 +281,108 @@ $ cat openclaw.json
 ssh -L 18789:localhost:18789 root@openclaw
 ```
 ---
+<br>
 
+## 6. Instalar nginx para exponer el Gateway a través de un proxy inverso 🌐
+### 6.1. Instalación
+```bash
+apt install -y nginx
+```
+
+### 6.2. Crear fichero para Basic Auth
+- `apache2-utils` es un paquete que incluye herramientas para gestionar la autenticación básica en servidores web, como `htpasswd`.
+- `htpasswd`:
+  - Crea un nuevo archivo de contraseñas y añade el usuario especificado. 
+  - Si el archivo ya existe, se sobrescribirá, por lo que SOLO debes usar `-c` la primera vez que crees el archivo.
+  - Guarda el hash de la contraseña en el archivo especificado.
+```bash
+apt install -y apache2-utils
+htpasswd -c /etc/nginx/.htpasswd admin  
+```
+
+### 6.3. Crear certificados SSL (opcional, pero recomendado para seguridad)
+- Crea un directorio llamado `ssl` dentro de `/etc/nginx` para almacenar los certificados SSL.
+```bash
+mkdir -p /etc/nginx/ssl
+```
+
+### 6.4. Configurar nginx como proxy inverso
+```bash
+nano /etc/nginx/sites-available/richyclaw
+```
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name richyclaw.com www.richyclaw.com;
+
+    return 301 https://richyclaw.com$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name www.richyclaw.com;
+
+    ssl_certificate /etc/nginx/ssl/richyclaw_com.crt;
+    ssl_certificate_key /etc/nginx/ssl/richyclaw_com.key;
+
+    return 301 https://richyclaw.com$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name richyclaw.com;
+
+    ssl_certificate /etc/nginx/ssl/richyclaw_com.crt;
+    ssl_certificate_key /etc/nginx/ssl/richyclaw_com.key;
+
+    auth_basic "Restricted";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+
+    location / {
+        proxy_pass http://127.0.0.1:18789;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_read_timeout 3600;
+        proxy_send_timeout 3600;
+    }
+}
+```
+```bash
+rm -f /etc/nginx/sites-enabled/default                                        # Eliminar la configuración por defecto de nginx para evitar conflictos
+ln -s /etc/nginx/sites-available/richyclaw /etc/nginx/sites-enabled/richyclaw # Habilitar la configuración del sitio creando un enlace simbólico
+nginx -t                                                                      # Probar la configuración de nginx para asegurarse de que no hay errores de sintaxis
+systemctl reload nginx                                                        # Recargar nginx para aplicar la nueva configuración sin interrumpir las conexiones actuales                       
+```
+
+### 6.5. Añadir nuevo device en OpenClaw
+```bash
+# 1º Obtenemos la url para poder acceder con token
+openclaw dashboard  # Abre la interfaz de control con tu token actual 
+
+# 2º Accedemos a la url
+https://richyclaw.com/#token=1234567890ABCDEF
+
+# 3º Vemos la id de nuestro nuevo device
+openclaw devices approve --latest
+
+# 4º Aprobamos el nuevo device con su id
+openclaw devices approve <device_id>
+```
+---
 <br><br><br>
+
 
 ## *[volver al índice](../README.md)*
