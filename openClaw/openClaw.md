@@ -17,55 +17,55 @@ curl -fsSL https://openclaw.ai/install.sh | bash
 
 ### 1.2. Pantallas de instalación
 - Entiendo que esto es personal por defecto y que el uso compartido/multiusuario requiere medidas de seguridad. ¿Continuar?  
-![Pantalla 1](../_img/openclaw_sreenshots/1.png)
+![Pantalla 1](../_img/openclaw_sreenshots/installation/1.png)
 
 - ¿Inicio rápido o manual?  
-![Pantalla 2](../_img/openclaw_sreenshots/2.png)
+![Pantalla 2](../_img/openclaw_sreenshots/installation/2.png)
 
 - ¿Gateway local o en la nube?  
-![Pantalla 3](../_img/openclaw_sreenshots/3.png)
+![Pantalla 3](../_img/openclaw_sreenshots/installation/3.png)
 
 - Directorio de trabajo del agente (workspace)  
-![Pantalla 4](../_img/openclaw_sreenshots/4.png)
+![Pantalla 4](../_img/openclaw_sreenshots/installation/4.png)
 
 - Configurar el OAuth para el modelo de lenguaje (en este caso, OpenAI Codex)  
-![Pantalla 5](../_img/openclaw_sreenshots/5.png)
+![Pantalla 5](../_img/openclaw_sreenshots/installation/5.png)
 
 - Abrir esa URL y copiar la URL que genera el proceso de autenticación (en este caso, para OpenAI Codex)  
-![Pantalla 6](../_img/openclaw_sreenshots/6.png)
+![Pantalla 6](../_img/openclaw_sreenshots/installation/6.png)
 
 - Modelo que se va a usar por defecto para los agentes (en este caso, OpenAI Codex GPT-5.4)  
-![Pantalla 7](../_img/openclaw_sreenshots/7.png)
+![Pantalla 7](../_img/openclaw_sreenshots/installation/7.png)
 
 - Puerto para el Gateway (18791 por defecto)  
-![Pantalla 8](../_img/openclaw_sreenshots/8.png)
+![Pantalla 8](../_img/openclaw_sreenshots/installation/8.png)
 
 - IP de enlace para el Gateway (loopback por defecto, lo que significa que solo será accesible desde la máquina local)  
-![Pantalla 9](../_img/openclaw_sreenshots/9.png)
+![Pantalla 9](../_img/openclaw_sreenshots/installation/9.png)
 
 - Autenticación para el Gateway (token por defecto, lo que significa que se generará un token de autenticación que se usará para acceder al Gateway)  
-![Pantalla 10](../_img/openclaw_sreenshots/10.png)
+![Pantalla 10](../_img/openclaw_sreenshots/installation/10.png)
 
 - Tailscale para el acceso remoto al Gateway (desactivado por defecto, lo que significa que el Gateway no estará accesible a través de Tailscale)  
-![Pantalla 11](../_img/openclaw_sreenshots/11.png)
+![Pantalla 11](../_img/openclaw_sreenshots/installation/11.png)
 
 - ¿Quieres proveer el token de autenticación ahora o dejar que se genere automáticamente? (generar automáticamente por defecto)  
-![Pantalla 12](../_img/openclaw_sreenshots/12.png)
+![Pantalla 12](../_img/openclaw_sreenshots/installation/12.png)
 
 - Token en blanco para que se genere automáticamente  
-![Pantalla 13](../_img/openclaw_sreenshots/13.png)
+![Pantalla 13](../_img/openclaw_sreenshots/installation/13.png)
 
 - ¿Configurar canales de chat? (no por defecto, lo que significa que los canales de comunicación se pueden configurar más tarde. Decimos que sí para configurar Telegram)  
-![Pantalla 14](../_img/openclaw_sreenshots/14.png)
+![Pantalla 14](../_img/openclaw_sreenshots/installation/14.png)
 
 - Selecciona un canal de chat para configurar (en este caso, Telegram)  
-![Pantalla 15](../_img/openclaw_sreenshots/15.png)
+![Pantalla 15](../_img/openclaw_sreenshots/installation/15.png)
 
 - Introducir el token del bot de Telegram  
-![Pantalla 16](../_img/openclaw_sreenshots/16.png)
+![Pantalla 16](../_img/openclaw_sreenshots/installation/16.png)
 
 - Configurar gestion de dispositivos (Device Managment). Por defecto se empareja
-![Pantalla 17](../_img/openclaw_sreenshots/17.png)
+![Pantalla 17](../_img/openclaw_sreenshots/installation/17.png)
 
 ---
 <br>
@@ -249,8 +249,34 @@ $ cat openclaw.json
 ---
 <br>
 
+## 4. Sesiones de conversación 💬
+![Estructura de sesiones](../_img/openclaw_sreenshots/sessions/sessions.png)
 
-## 4. Conexión SSH (tunneling) 🔐
+- La sesión de conversación se gestiona mediante el archivo `.openclaw/agents/main/sessions/sessions.json`, que contiene un índice de sesiones con:
+  - `sessionKey`: clave de sesión que identifica el chat lógico según su origen (webchat, Telegram, grupo, webhook, etc.).
+  - `sessionId`: identifica el transcript actual de esa sesión.
+  - `sessionFile`: ruta del archivo `.jsonl` donde está el historial real.
+  - `deliveryContext` y `origin`: indican de dónde proviene la conversación (canal, usuario, etc.).
+  - estado de ejecución: modelo usado, tokens, tiempos, coste estimado, estado final, etc.
+  - `skillsSnapshot` y `systemPromptReport`: metadatos del prompt y skills, que describen cómo se ejecutó la sesión (no el contenido del chat).
+![session.json](../_img/openclaw_sreenshots/sessions/session_json.png)
+
+- Cada chat es un archivo `.jsonl` con un ID único (UUID aleatorio generado por OpenClaw), que contiene el transcript real de la sesión en formato JSON Lines:
+  - mensajes del usuario
+  - respuestas del asistente
+  - llamadas a herramientas
+  - resultados de herramientas
+  - eventos internos de la sesión
+  - estructura en árbol mediante `id` y `parentId` (permite ramificaciones del chat)
+![jsonl](../_img/openclaw_sreenshots/sessions/jsonl.png)
+
+- Cuando se usa `/new` o `/reset`, el transcript anterior no se elimina:
+  - se guarda como `*.jsonl.reset.<fecha>`
+  - y se crea un nuevo `.jsonl` con un nuevo `sessionId`
+---
+<br>
+
+## 5. Conexión SSH (tunneling) 🔐
 ```bash
 ssh -L 18789:localhost:18789 root@openclaw
 ```
